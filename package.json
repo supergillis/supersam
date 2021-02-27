@@ -1,7 +1,7 @@
 {
   "name": "sam-cdk",
-  "version": "1.0.0",
-  "description": "Generate environment variables from CDK projects for use with SAM CLI.",
+  "version": "1.0.1",
+  "description": "Extract environment variables from Lambda functions for use with SAM CLI.",
   "keywords": [
     "aws",
     "lambda",

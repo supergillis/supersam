@@ -14,7 +14,7 @@ yargs(process.argv.slice(2))
   .demandOption('template')
   .command({
     command: 'environment',
-    describe: 'generate environment',
+    describe: 'creates environment file',
     handler: environment,
   })
   .command({

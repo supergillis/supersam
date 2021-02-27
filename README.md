@@ -6,7 +6,7 @@
   </a>
 </div>
 
-Generate environment variables from CDK projects for use by SAM CLI.
+Extract environment variables from Lambda functions for use with SAM CLI.
 
 ## Usage
 
@@ -18,7 +18,7 @@ sam-cdk COMMAND --stack STACK_NAME --template TEMPLATE [...SAM_CLI_OPTIONS]
 
 ### `sam-cdk environment`
 
-The `sam-cdk environment` command generates a file that can be used as `env-vars` option to the SAM CLI. The command looks for all the Lambda functions in the given template. The environment variables of those Lambda functions are loaded from the stack with the given stack name and stored in the given output file.
+The `sam-cdk environment` command creates a file that can be used as `env-vars` option to the SAM CLI. The command looks for all the Lambda functions in the given template. The environment variables of those Lambda functions are loaded from the stack with the given stack name and stored in the given output file.
 
 ```shell
 sam-cdk environment --stack STACK_NAME --template ./cdk.out/stack.template.json --output ./environment.json
@@ -56,6 +56,8 @@ sam-cdk local invoke FunctionName --stack STACK_NAME --template ./cdk.out/stack.
 ## Notes
 
 ### CDK
+
+This tool works great with CDK.
 
 Your CDK stack has to be deployed before using this tool.
 
