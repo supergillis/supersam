@@ -7,6 +7,7 @@ import { getEnvironment } from './environment';
 const log = console.log;
 
 yargs(process.argv.slice(2))
+  .scriptName('sam-cdk')
   .strictCommands()
   .demandCommand(1)
   .demandOption('stack')

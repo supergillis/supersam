@@ -1,19 +1,26 @@
 import fs from 'fs';
 import path from 'path';
+import { Credentials, CredentialProvider } from '@aws-sdk/types';
+import { defaultProvider } from '@aws-sdk/credential-provider-node';
 import { CloudFormation } from '@aws-sdk/client-cloudformation';
 import { Lambda } from '@aws-sdk/client-lambda';
-
-const cloudFormation = new CloudFormation({});
-const lambda = new Lambda({});
 
 export type Environment = Record<string, Record<string, string>>;
 
 export interface GetEnvironmentProps {
+  credentials?: Credentials | CredentialProvider;
   stackName: string;
   templatePath: string;
 }
 
-export async function getEnvironment({ stackName, templatePath }: GetEnvironmentProps) {
+export async function getEnvironment({
+  credentials = defaultProvider(),
+  stackName,
+  templatePath,
+}: GetEnvironmentProps) {
+  const cloudFormation = new CloudFormation({ credentials });
+  const lambda = new Lambda({ credentials });
+
   const describeStackResources = await cloudFormation.describeStackResources({
     StackName: stackName,
   });
@@ -27,7 +34,7 @@ export async function getEnvironment({ stackName, templatePath }: GetEnvironment
   }
 
   const stackResources = describeStackResources.StackResources!;
-  const templateContent = fs.readFileSync(templatePath);
+  const templateContent = fs.readFileSync(templateFullPath);
   const template = JSON.parse(templateContent.toString());
   const templateResources: Record<string, any> = template.Resources ?? {};
 

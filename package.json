@@ -1,36 +1,53 @@
 {
   "name": "sam-cdk",
-  "version": "0.0.1",
-  "main": "./src/index.ts",
-  "bin": {
-    "sam-cdk": "./dist/sam-cdk.js"
+  "version": "1.0.0",
+  "description": "Generate environment variables from CDK projects for use with SAM CLI.",
+  "keywords": [
+    "aws",
+    "lambda",
+    "sam",
+    "sam-cli",
+    "cdk"
+  ],
+  "author": {
+    "name": "Gillis Van Ginderacter",
+    "email": "supergillis@gmail.com",
+    "url": "https://github.com/supergillis"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/supergillis/sam-cdk.git"
+  },
+  "license": "GPLv3",
   "scripts": {
-    "build": "pnpx ts-node esbuild.ts",
-    "typecheck": "pnpx tsc --noEmit",
-    "format": "pnpm run format:eslint; pnpm run format:prettier",
-    "format:eslint": "pnpx eslint --fix --ignore-path .gitignore .",
-    "format:prettier": "pnpx prettier --write --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
-    "lint": "pnpm run lint:eslint && pnpm run lint:prettier",
-    "lint:eslint": "pnpx eslint --ignore-path .gitignore .",
-    "lint:prettier": "pnpx prettier --check --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'"
+    "prepublishOnly": "pnpm run build",
+    "build": "pnpm run build:lib && pnpm run build:bin",
+    "build:lib": "pnpx tsc -p tsconfig.json && pnpx tsc -p tsconfig.esm.json",
+    "build:bin": "pnpx esbuild --platform=node --target=node12 --minify --bundle --outdir=./bin ./src/cli.ts",
+    "lint": "pnpm run lint:typecheck && pnpm run lint:prettier",
+    "lint:typecheck": "pnpx tsc --noEmit",
+    "lint:prettier": "pnpx prettier --check --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'",
+    "format:prettier": "pnpx prettier --write --ignore-path .gitignore '**/*.{js,jsx,ts,tsx}'"
+  },
+  "main": "./dist/cjs/index.js",
+  "types": "./dist/cjs/index.d.ts",
+  "module": "./dist/esm/index.js",
+  "bin": {
+    "sam-cdk": "./bin/cli.js"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.1.0",
     "@aws-sdk/client-lambda": "^3.1.0",
     "@aws-sdk/credential-provider-node": "^3.7.0",
-    "@esbuild-plugins/tsconfig-paths": "^0.0.4",
-    "@types/yargs": "^16.0.0",
+    "@aws-sdk/types": "^3.6.1",
     "chalk": "^4.1.0",
     "execa": "^5.0.0",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
-    "@types/node": "14.x",
-    "@typescript-eslint/eslint-plugin": "^4.14.0",
-    "@typescript-eslint/parser": "^4.14.0",
-    "esbuild": "^0.8.52",
-    "eslint": "^7.18.0",
+    "@types/node": "^14.0.0",
+    "@types/yargs": "^16.0.0",
+    "esbuild": "^0.8.53",
     "prettier": "^2.2.1",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.4"

@@ -1,15 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es2020",
-    "lib": ["es2020"],
+    "target": "es5",
+    "lib": ["es2019", "dom"],
     "module": "commonjs",
     "moduleResolution": "node",
     "strict": true,
     "declaration": true,
     "esModuleInterop": true,
-    "noImplicitAny": true,
-    "resolveJsonModule": true,
-    "baseUrl": "./src"
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "outDir": "./dist/cjs"
   },
-  "exclude": ["node_modules"]
+  "include": ["./src"]
 }
