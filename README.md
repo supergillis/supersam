@@ -1,4 +1,4 @@
-# SAM CDK
+# sam-cdk
 
 <div>
   <a href="https://www.npmjs.com/package/sam-cdk">
@@ -6,11 +6,11 @@
   </a>
 </div>
 
-Extract environment variables from Lambda functions for use with SAM CLI.
-
 ## Usage
 
-`sam-cdk` wraps `sam` CLI. All `sam` CLI options can be passed to `sam-cdk`. The only difference is that `sam-cdk` needs a stack name to lookup Lambda function environments.
+`sam-cdk` wraps `sam` CLI and uses the Lambda function environment as parameter to the `env-vars` option of SAM CLI.
+
+All `sam` CLI options can be passed to `sam-cdk`. The only difference is that `sam-cdk` needs a stack name to lookup Lambda function environments.
 
 ```shell
 sam-cdk COMMAND --stack STACK_NAME --template TEMPLATE [...SAM_CLI_OPTIONS]

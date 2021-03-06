@@ -1,7 +1,7 @@
 {
   "name": "sam-cdk",
   "version": "1.0.1",
-  "description": "Extract environment variables from Lambda functions for use with SAM CLI.",
+  "description": "Use SAM CLI for Lambda functions deployed with CDK.",
   "keywords": [
     "aws",
     "lambda",
