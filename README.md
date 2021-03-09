@@ -1,57 +1,57 @@
-# sam-cdk
+# supersam
 
 <div>
-  <a href="https://www.npmjs.com/package/sam-cdk">
-    <img alt="npm" src="https://img.shields.io/npm/v/sam-cdk.svg?color=green"/>
+  <a href="https://www.npmjs.com/package/supersam">
+    <img alt="npm" src="https://img.shields.io/npm/v/supersam.svg?color=green"/>
   </a>
 </div>
 
 ## Usage
 
-`sam-cdk` wraps `sam` CLI and uses the Lambda function environment as parameter to the `env-vars` option of SAM CLI.
+`supersam` wraps `sam` CLI and uses the Lambda function environment as parameter to the `env-vars` option of SAM CLI. Additionally, `supersam` looks for Lambda functions with `supersam:watch:command` and `supersam:watch:directory` metadata and launches the given command as a child process.
 
-All `sam` CLI options can be passed to `sam-cdk`. The only difference is that `sam-cdk` needs a stack name to lookup Lambda function environments.
+All `sam` CLI options can be passed to `supersam`. The only difference is that `supersam` needs an additional stack name parameter to lookup Lambda function environments.
 
 ```shell
-sam-cdk COMMAND --stack STACK_NAME --template TEMPLATE [...SAM_CLI_OPTIONS]
+supersam COMMAND --stack STACK_NAME --template TEMPLATE [...SAM_CLI_OPTIONS]
 ```
 
-### `sam-cdk environment`
+### `supersam environment`
 
-The `sam-cdk environment` command creates a file that can be used as `env-vars` option to the SAM CLI. The command looks for all the Lambda functions in the given template. The environment variables of those Lambda functions are loaded from the stack with the given stack name and stored in the given output file.
+The `supersam environment` command creates a file that can be used as `env-vars` option to the SAM CLI. The command looks for all the Lambda functions in the given template. The environment variables of those Lambda functions are loaded from the stack with the given stack name and stored in the given output file.
 
 ```shell
-sam-cdk environment --stack STACK_NAME --template ./cdk.out/stack.template.json --output ./environment.json
+supersam environment --stack STACK_NAME --template ./cdk.out/stack.template.json --output ./environment.json
 sam --template ./cdk.out/stack.template.json --env-vars ./environment.json
 ```
 
-### `sam-cdk local start-api`
+### `supersam local start-api`
 
-The `sam-cdk local start-api` command invokes the corresponding SAM CLI `sam local start-api` command and automatically includes the `env-vars` as described above.
+The `supersam local start-api` command invokes the corresponding SAM CLI `sam local start-api` command and automatically includes the `env-vars` as described above.
 
 ```shell
-sam-cdk local start-api --stack STACK_NAME --template ./cdk.out/stack.template.json [...SAM_CLI_OPTIONS]
+supersam local start-api --stack STACK_NAME --template ./cdk.out/stack.template.json [...SAM_CLI_OPTIONS]
 ```
 
-### `sam-cdk local start-lambda`
+### `supersam local start-lambda`
 
-The `sam-cdk local start-lambda` command invokes the corresponding SAM CLI `sam local start-lambda` command and automatically includes the `env-vars` as described above.
+The `supersam local start-lambda` command invokes the corresponding SAM CLI `sam local start-lambda` command and automatically includes the `env-vars` as described above.
 
 ```shell
-sam-cdk local start-lambda --stack STACK_NAME --template ./cdk.out/stack.template.json [...SAM_CLI_OPTIONS]
+supersam local start-lambda --stack STACK_NAME --template ./cdk.out/stack.template.json [...SAM_CLI_OPTIONS]
 ```
 
-### `sam-cdk invoke`
+### `supersam invoke`
 
-The `sam-cdk invoke` command invokes the corresponding SAM CLI `sam local invoke` command and automatically includes the `env-vars` as described above.
+The `supersam invoke` command invokes the corresponding SAM CLI `sam local invoke` command and automatically includes the `env-vars` as described above.
 
 ```shell
-sam-cdk local invoke FunctionName --stack STACK_NAME --template ./cdk.out/stack.template.json [...SAM_CLI_OPTIONS]
+supersam local invoke FunctionName --stack STACK_NAME --template ./cdk.out/stack.template.json [...SAM_CLI_OPTIONS]
 ```
 
 ### Permissions
 
-`sam-cdk` is using AWS SDK to lookup Lambda function environments. Make sure you are using an IAM role or user that can [describe CloudFormation stack resources](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DescribeStackResources.html) and [get Lambda function configuration](https://docs.aws.amazon.com/lambda/latest/dg/API_GetFunctionConfiguration.html).
+`supersam` is using AWS SDK to lookup Lambda function environments. Make sure you are using an IAM role or user that can [describe CloudFormation stack resources](https://docs.aws.amazon.com/AWSCloudFormation/latest/APIReference/API_DescribeStackResources.html) and [get Lambda function configuration](https://docs.aws.amazon.com/lambda/latest/dg/API_GetFunctionConfiguration.html).
 
 ## Notes
 
@@ -59,7 +59,16 @@ sam-cdk local invoke FunctionName --stack STACK_NAME --template ./cdk.out/stack.
 
 This tool works great with CDK.
 
-Your CDK stack has to be deployed before using this tool.
+Your CDK stack has to be deployed before using `supersam` otherwise the Lambda function environment will not be found.
+
+The following snippet shows you how to add the `supersam` metadata to your Lambda functions.
+
+```typescript
+const fn = new lambda.Function(scope, 'Function', ...);
+const fnCfnResource = fn.node.defaultChild as cdk.CfnResource;
+fnCfnResource.addMetadata('supersam:watch:command', 'pnpm watch');
+fnCfnResource.addMetadata('supersam:watch:directory', './lambda-code`);
+```
 
 Make sure to synthesize your CDK application using the `--no-staging` option. CDK then adds metadata `aws:asset:path` pointing to your local code for every Lambda function in the synthesized template.
 

@@ -6,6 +6,7 @@ import { CloudFormation } from '@aws-sdk/client-cloudformation';
 import { Lambda } from '@aws-sdk/client-lambda';
 
 export type Environment = Record<string, Record<string, string>>;
+export type Metadata = Record<string, Record<string, string>>;
 
 export interface GetEnvironmentProps {
   credentials?: Credentials | CredentialProvider;
@@ -13,11 +14,18 @@ export interface GetEnvironmentProps {
   templatePath: string;
 }
 
+export interface GetMetadataProps {
+  templatePath: string;
+}
+
+/**
+ * Find the environments for every Lambda function in the given template.
+ */
 export async function getEnvironment({
   credentials = defaultProvider(),
   stackName,
   templatePath,
-}: GetEnvironmentProps) {
+}: GetEnvironmentProps): Promise<Environment> {
   const cloudFormation = new CloudFormation({ credentials });
   const lambda = new Lambda({ credentials });
 
@@ -63,4 +71,23 @@ export async function getEnvironment({
   const environmentEntries = await Promise.all(functionLogicalIds.map(getEnvironmentVariables));
   const environment: Environment = Object.fromEntries(environmentEntries);
   return environment;
+}
+
+/**
+ * Find the metadata for every Lambda function in the given template.
+ */
+export async function getMetadata({ templatePath }: GetMetadataProps): Promise<Metadata> {
+  const templateFullPath = path.resolve(templatePath);
+  const templateContent = fs.readFileSync(templateFullPath);
+  const template = JSON.parse(templateContent.toString());
+  const templateResources: Record<string, any> = template.Resources ?? {};
+
+  // Find logical IDs for all Lambda functions
+  const metadataEntries = Object.entries(templateResources)
+    .filter(([, resource]) => resource.Type === 'AWS::Lambda::Function')
+    .filter(([, resource]) => !!resource.Metadata)
+    .map(([logicalId, resource]) => [logicalId, resource.Metadata]);
+
+  const metadata: Metadata = Object.fromEntries(metadataEntries);
+  return metadata;
 }

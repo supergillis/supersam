@@ -2,7 +2,8 @@ import fs from 'fs';
 import execa from 'execa';
 import yargs from 'yargs';
 import chalk from 'chalk';
-import { getEnvironment } from './environment';
+import pt from 'prepend-transform';
+import { getEnvironment, getMetadata } from './environment';
 
 const log = console.log;
 
@@ -42,12 +43,14 @@ yargs(process.argv.slice(2))
   }).argv;
 
 /**
- * Write the environment
+ * Write the environment.
  */
 async function environment(argv: any) {
   const stackName = argv['stack'] as string;
   const templatePath = argv['template'] as string;
   const outputPath = (argv['output'] as string) ?? `${templatePath}.sam-cdk.json`;
+
+  // TODO Merge additional --env-vars
 
   if (fs.existsSync(outputPath)) {
     log(chalk.dim(chalk.bold(`Cached environment:`), outputPath));
@@ -61,10 +64,20 @@ async function environment(argv: any) {
 }
 
 /**
+ * Get the metadata.
+ */
+async function metadata(argv: any) {
+  const templatePath = argv['template'] as string;
+  const functionMetadata = await getMetadata({ templatePath });
+  return { templatePath, functionMetadata };
+}
+
+/**
  * This function calls the SAM CLI and automatically adds the `template` and `env-vars` parameters.
  */
 async function local(argv: any) {
   const { outputPath } = await environment(argv);
+  const { functionMetadata } = await metadata(argv);
 
   // Construct list of SAM CLI arguments
   const samArgv = [...argv['_'], '--env-vars', outputPath];
@@ -91,11 +104,48 @@ async function local(argv: any) {
     }
   }
 
-  log(chalk.dim(chalk.bold(`Running command:`), `sam ${samArgv.join(' ')}`));
+  // List of default colors to use for prefixing the spawned process outputs
+  const colors = [chalk.green, chalk.blue, chalk.red];
+  const nextColor = () => colors.shift() ?? chalk.yellow;
 
-  execa.sync('sam', samArgv, {
-    stdin: process.stdin,
-    stdout: process.stdout,
-    stderr: process.stderr,
+  // Run SAM
+  const sam = run({
+    name: nextColor()('sam'),
+    command: 'sam',
+    argv: samArgv,
   });
+
+  // Run all functions that have supersam metadata
+  const watchers = [];
+  for (const [logicalId, metadata] of Object.entries(functionMetadata)) {
+    const fullCommand = metadata?.['supersam:watch:command'];
+    const cwd = metadata?.['supersam:watch:directory'];
+    if (fullCommand) {
+      const [command, ...argv] = fullCommand.split(' ');
+
+      // Run the supersam watch command
+      watchers.push(
+        run({
+          name: nextColor()(logicalId),
+          command,
+          argv,
+          cwd,
+        }),
+      );
+    }
+  }
+
+  // Wait for the first command to finish
+  await Promise.all([sam, ...watchers]);
+}
+
+/**
+ * Auxiliary function to run a command and prefix its output.
+ */
+function run({ command, name = command, argv, cwd }: { name: string; command: string; argv: string[]; cwd?: string }) {
+  log(chalk.dim(chalk.bold(`Running command:`), `${command} ${argv.join(' ')}`));
+
+  const sam = execa(command, argv, { cwd });
+  sam.stdout?.pipe(pt(`${name} `))?.pipe(process.stdout);
+  sam.stderr?.pipe(pt(`${name} `))?.pipe(process.stderr);
 }

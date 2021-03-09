@@ -1,5 +1,5 @@
 {
-  "name": "sam-cdk",
+  "name": "supersam",
   "version": "1.0.1",
   "description": "Use SAM CLI for Lambda functions deployed with CDK.",
   "keywords": [
@@ -16,7 +16,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/supergillis/sam-cdk.git"
+    "url": "https://github.com/supergillis/supersam.git"
   },
   "license": "GPLv3",
   "scripts": {
@@ -33,7 +33,7 @@
   "types": "./dist/cjs/index.d.ts",
   "module": "./dist/esm/index.js",
   "bin": {
-    "sam-cdk": "./bin/cli.js"
+    "supersam": "./bin/cli.js"
   },
   "dependencies": {
     "@aws-sdk/client-cloudformation": "^3.1.0",
@@ -42,6 +42,7 @@
     "@aws-sdk/types": "^3.6.1",
     "chalk": "^4.1.0",
     "execa": "^5.0.0",
+    "prepend-transform": "^0.0.1019",
     "yargs": "^16.2.0"
   },
   "devDependencies": {
